@@ -3,10 +3,16 @@ import React, { createContext, useState } from "react";
 export const ProductContext = createContext();
 
 export const ProductProvider = ({ children }) => {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState({
+    Men: [],
+    Women: [],
+  });
 
   const addProduct = (product) => {
-    setProducts((prevProducts) => [...prevProducts, product]);
+    setProducts((prevProducts) => ({
+      ...prevProducts,
+      [product.category]: [...prevProducts[product.category], product],
+    }));
   };
 
   return (

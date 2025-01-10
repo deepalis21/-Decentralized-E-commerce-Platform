@@ -1,8 +1,14 @@
 import React, { useState, useContext } from "react";
 import { create } from "ipfs-http-client";
 import { ProductContext } from "./ProductContext";
-
-const client = create("https://ipfs.infura.io:5001/api/v0");
+const client = create({
+    host: "ipfs.infura.io",
+    port: 5001,
+    protocol: "https",
+    headers: {
+      authorization: `Basic ${btoa("PROJECT_ID:PROJECT_SECRET")}`,
+    },
+  });
 
 const ProductUpload = () => {
   const { addProduct } = useContext(ProductContext);
@@ -14,28 +20,31 @@ const ProductUpload = () => {
   });
   const [ipfsHash, setIpfsHash] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     setIsUploading(true);
+    setUploadError(""); // Clear any previous error
     try {
       const added = await client.add(file);
-      console.log("IPFS Hash:", added.path);
       setIpfsHash(added.path);
       setIsUploading(false);
-      alert("Image uploaded successfully!");
     } catch (error) {
       setIsUploading(false);
+      setUploadError("Failed to upload image. Please try again.");
       console.error("Error uploading file: ", error);
-      alert("Failed to upload image. Please try again.");
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("IPFS Hash at Submit:", ipfsHash);
+    if (!product.name || !product.description || !product.price) {
+      alert("Please fill in all the product details.");
+      return;
+    }
     if (!ipfsHash) {
       alert("Please upload an image before submitting.");
       return;
@@ -43,14 +52,14 @@ const ProductUpload = () => {
 
     try {
       const metadata = { ...product, image: ipfsHash };
-      console.log("Metadata to be uploaded:", metadata);
       addProduct(metadata);
       alert("Product uploaded successfully!");
+      // Reset form and states
       setProduct({ name: "", description: "", price: "", category: "Men" });
       setIpfsHash("");
     } catch (error) {
       console.error("Error submitting product: ", error);
-      alert("Failed to upload product metadata. Please try again.");
+      alert("Failed to upload product. Please try again.");
     }
   };
 
@@ -69,7 +78,9 @@ const ProductUpload = () => {
         <textarea
           placeholder="Description"
           value={product.description}
-          onChange={(e) => setProduct({ ...product, description: e.target.value })}
+          onChange={(e) =>
+            setProduct({ ...product, description: e.target.value })
+          }
           className="w-full p-2 mb-4 border rounded"
           required
         />
@@ -83,14 +94,25 @@ const ProductUpload = () => {
         />
         <select
           value={product.category}
-          onChange={(e) => setProduct({ ...product, category: e.target.value })}
+          onChange={(e) =>
+            setProduct({ ...product, category: e.target.value })
+          }
           className="w-full p-2 mb-4 border rounded bg-white"
         >
           <option value="Men">Men</option>
           <option value="Women">Women</option>
         </select>
-        <input type="file" onChange={handleImageUpload} className="w-full mb-4" />
-        {isUploading && <p className="text-sm text-blue-500">Uploading image...</p>}
+        <input
+          type="file"
+          onChange={handleImageUpload}
+          className="w-full mb-4"
+        />
+        {isUploading && (
+          <p className="text-sm text-blue-500">Uploading image...</p>
+        )}
+        {uploadError && (
+          <p className="text-sm text-red-500">{uploadError}</p>
+        )}
         {ipfsHash && (
           <div className="mt-4">
             <p className="text-sm text-green-500">Image uploaded successfully!</p>
@@ -101,7 +123,10 @@ const ProductUpload = () => {
             />
           </div>
         )}
-        <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full">
+        <button
+          type="submit"
+          className="bg-blue-500 text-white p-2 rounded w-full"
+        >
           Upload Product
         </button>
       </form>

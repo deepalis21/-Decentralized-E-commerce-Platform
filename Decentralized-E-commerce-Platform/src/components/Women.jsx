@@ -1,45 +1,55 @@
-import React from "react";
-import { Link } from "react-router-dom"; // Import Link for navigation
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { useCart } from "./CartContext"; // Import CartContext
 
 const Women = () => {
-  // Sample product data
+  const { addItemToCart } = useCart(); // Get the addItemToCart function
+  const [notification, setNotification] = useState("");
 
+  // Sample product data
   const products = [
-      {
-        id: 1,
-        name: "T-Shirt Name 10",
-        price: "$33.00 - $36.00",
-        category: "Women",
-        image:
-          "https://images.unsplash.com/photo-1564038079594-99ba184fd036?q=80&w=2786&auto=format&fit=crop",
-      },
-      {
-        id: 2,
-        name: "T-Shirt Name 2",
-        price: "$22.00 - $27.00",
-        category: "Women",
-        image:
-          "https://images.pexels.com/photos/2073302/pexels-photo-2073302.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-      },
-      {
-        id: 3,
-        name: "T-Shirt Name 5",
-        price: "$18.00 - $20.00",
-        category: "Women",
-        image:
-          "https://images.pexels.com/photos/2073280/pexels-photo-2073280.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-        discount: "14%",
-      },
-      {
-        id: 4,
-        name: "T-Shirt Name 8",
-        price: "$32.00 - $34.00",
-        category: "Women",
-        image:
-          "https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-      },
+    {
+      id: 1,
+      name: "T-Shirt Name 10",
+      price: "$33.00 - $36.00",
+      category: "Women",
+      image:
+        "https://images.unsplash.com/photo-1564038079594-99ba184fd036?q=80&w=2786&auto=format&fit=crop",
+    },
+    {
+      id: 2,
+      name: "T-Shirt Name 2",
+      price: "$22.00 - $27.00",
+      category: "Women",
+      image:
+        "https://images.pexels.com/photos/2073302/pexels-photo-2073302.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    },
+    {
+      id: 3,
+      name: "T-Shirt Name 5",
+      price: "$18.00 - $20.00",
+      category: "Women",
+      image:
+        "https://images.pexels.com/photos/2073280/pexels-photo-2073280.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+      discount: "14%",
+    },
+    {
+      id: 4,
+      name: "T-Shirt Name 8",
+      price: "$32.00 - $34.00",
+      category: "Women",
+      image:
+        "https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    },
   ];
-   
+
+  // Handle adding product to cart
+  const handleAddToCart = (product) => {
+    addItemToCart(product);
+    setNotification(`${product.name} has been added to your cart!`);
+    setTimeout(() => setNotification(""), 2000); // Clear notification after 2 seconds
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Main Content */}
@@ -55,7 +65,14 @@ const Women = () => {
 
         {/* Title */}
         <h1 className="text-4xl font-bold mb-2">Shop</h1>
-        <p className="text-gray-500 mb-6">Showing 1–8 of 10 results</p>
+        <p className="text-gray-500 mb-6">Showing {products.length} results</p>
+
+        {/* Notification for added product */}
+        {notification && (
+          <div className="bg-green-100 text-green-800 p-4 rounded mb-6 shadow">
+            <p>{notification}</p>
+          </div>
+        )}
 
         {/* Sorting */}
         <div className="flex items-center justify-between mb-10">
@@ -92,25 +109,17 @@ const Women = () => {
                 <h3 className="text-sm text-gray-500">{product.category}</h3>
                 <h2 className="font-bold text-lg">{product.name}</h2>
                 <p className="text-gray-600 mt-2">{product.price}</p>
-                <div className="flex mt-4 gap-2">
-                  <span className="w-4 h-4 bg-black rounded-full"></span>
-                  <span className="w-4 h-4 bg-pink-300 rounded-full"></span>
-                  <span className="w-4 h-4 bg-white border rounded-full"></span>
-                </div>
-                <div className="flex mt-2 gap-2 text-gray-700">
-                  <span className="border px-3 py-1 rounded text-xs">XS</span>
-                  <span className="border px-3 py-1 rounded text-xs">S</span>
-                  <span className="border px-3 py-1 rounded text-xs">M</span>
-                  <span className="border px-3 py-1 rounded text-xs">L</span>
-                  <span className="border px-3 py-1 rounded text-xs">XL</span>
-                </div>
+                <button
+                  className="bg-blue-500 text-white px-4 py-2 mt-4 rounded hover:bg-blue-600 transition"
+                  onClick={() => handleAddToCart(product)}
+                >
+                  Add to Cart
+                </button>
               </div>
             </div>
           ))}
         </div>
       </div>
-
-      
     </div>
   );
 };
